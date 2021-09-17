@@ -32,12 +32,14 @@ jobs:
       - name: Webpack Build Bundles
         run: npm run build
 
-      - name: Git Push /Public
+      - name: Git Push ./public
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'actions@users.noreply.github.com'
+          ls
           mv .git ./public
           cd ./public
+          ls
           git checkout -b bundle
           git commit -am "build-$(date)"
           git push -u -f origin bundle
