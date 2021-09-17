@@ -1,10 +1,10 @@
-name: Build:Master
+name: Webpack-Build-Master
+
 on:
     workflow_dispatch:
     push:
         branches:
             - master
-            
 
 jobs:
   build:
