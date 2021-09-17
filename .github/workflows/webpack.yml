@@ -38,8 +38,8 @@ jobs:
           git config --global user.email 'actions@users.noreply.github.com'
           mv .git ./public
           cd ./public
-          git add .
           git checkout -b bundle
+          git add .
           git commit -am "build-$(date)"
           git push -u -f origin bundle
 
