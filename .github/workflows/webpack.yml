@@ -1,10 +1,10 @@
-name: NodeJS with Gulp
-
+name: Build:Master
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    workflow_dispatch:
+    push:
+        branches:
+            - master
+            
 
 jobs:
   build:
