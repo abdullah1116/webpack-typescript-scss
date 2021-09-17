@@ -1,45 +1,46 @@
-name: Build:Master
+name: Wabpack:Build:Master
 on:
-    workflow_dispatch:
-    push:
-        branches:
-            - master
+  workflow_dispatch:
+  push:
+    branches:
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v2
 
-    - name: Node Setup
-      uses: actions/setup-node@v1
-      with:
+    steps:
+      - name: Git Install
+        uses: actions/checkout@v2
+
+      - name: Node Setup
+        uses: actions/setup-node@v1
+        with:
           node-version: '14.x'
 
-     - name: Build and Push
-              uses: actions/checkout@v2
+      - name: Build and Push
+        uses: actions/checkout@v2
 
-            - name: Node Setup
-              uses: actions/setup-node@v1
-              with:
-                  node-version: '14.x'
+      - name: Node Setup
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
 
-            - name: NPM Install
-              run: npm install
+      - name: NPM Install
+        run: npm install
 
-            - name: Webpack Build Bundles
-              run: npm run build
+      - name: Webpack Build Bundles
+        run: npm run build
 
-            - name: Git Push /Public
-              run: |
-                  git config --global user.name 'github-actions'
-                  git config --global user.email 'actions@users.noreply.github.com'
-                  mv .git ./public
-                  cd ./public
-                  git checkout -b bundle
-                  git commit -am "build-$(date)"
-                  git push -u -f origin bundle
-            
-            - name: Server Webhook
-              run: curl https://example.com/gitpull.php
+      - name: Git Push /Public
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'actions@users.noreply.github.com'
+          mv .git ./public
+          cd ./public
+          git checkout -b bundle
+          git commit -am "build-$(date)"
+          git push -u -f origin bundle
+
+      - name: Server Webhook
+        run: curl https://example.com/gitpull.php
