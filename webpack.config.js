@@ -1,17 +1,25 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { htmlWebpackPluginGlob } = require('html-webpack-plugin-glob');
+const CopyPlugin = require('copy-webpack-plugin');
+const glob = require('glob');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { config } = require('process');
+const path = require('path');
+const PurgeCSSPlugin = require('purgecss-webpack-plugin');
 
 module.exports = (env, argv) => {
-  const dev = argv.mode !== 'production';
-  const onDev = (d, p = undefined) => (dev ? d : p);
+  function onDev(onDev, onProd = undefined) {
+    return argv.mode !== 'production' ? onDev : onProd;
+  }
 
   /** @type {import('webpack').Configuration} */
   const config = {
-    entry: './src/ts/index.ts',
+    entry: './src/ts/bootstrap.ts',
     module: {
       rules: [
+        {
+          test: /\.html$/i,
+          exclude: /(node_modules)/,
+          loader: 'html-loader',
+        },
         {
           test: /\.ts$/,
           use: 'ts-loader',
@@ -24,7 +32,7 @@ module.exports = (env, argv) => {
             {
               loader: 'sass-loader',
               options: {
-                sourceMap: dev,
+                sourceMap: onDev(true, false),
                 sassOptions: {
                   outputStyle: 'compressed',
                 },
@@ -32,11 +40,34 @@ module.exports = (env, argv) => {
             },
           ],
         },
+        {
+          test: /\.(bmp|ico|cur|gif|jpg|jpeg|jfif|png|svg|webp|png|svg|jpg|jpeg|gif|ico)$/i,
+          type: 'asset/resource',
+        },
+        {
+          test: /\.(woff|woff2|eot|ttf|otf)$/i,
+          type: 'asset/resource',
+        },
+        {
+          test: /\.(csv|tsv)$/i,
+          use: 'csv-loader',
+        },
+        {
+          test: /\.xml$/i,
+          use: 'xml-loader',
+        },
       ],
     },
     plugins: [
-      new MiniCssExtractPlugin({ filename: '[name].[contenthash].css' }),
-      new HtmlWebpackPlugin({ template: 'src/index.html' }),
+      new MiniCssExtractPlugin({ filename: 'bundle.[contenthash].css' }),
+      // @ts-ignore
+      new PurgeCSSPlugin({
+        paths: glob.sync('src/**/*', { nodir: true }),
+      }),
+      new CopyPlugin({
+        patterns: [{ from: 'src/public', to: '' }],
+      }),
+      ...htmlWebpackPluginGlob({ path: './src/pages/' }),
     ],
     resolve: {
       extensions: ['.js', '.ts', '.css', '.scss'],
@@ -56,9 +87,10 @@ module.exports = (env, argv) => {
     },
 
     output: {
-      path: path.join(__dirname, 'public'),
-      filename: '[name].[contenthash].js',
       clean: true,
+      path: path.join(__dirname, 'public'),
+      filename: 'bundle.[contenthash].js',
+      assetModuleFilename: 'assets/[hash][ext]',
     },
 
     mode: onDev('development', 'production'),
